@@ -61,7 +61,9 @@ struct Args {
 #[derive(Subcommand)]
 enum Command {
     Serve {
-        #[arg(short, long, default_value_t = 9222)]
+        // PORT env fallback lets PaaS hosts (Railway, Render, Fly, Heroku)
+        // inject the listen port at runtime. An explicit --port still wins.
+        #[arg(short, long, env = "PORT", default_value_t = 9222)]
         port: u16,
 
         // Bind address. Defaults to 127.0.0.1 (loopback only) for safety.
