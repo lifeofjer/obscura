@@ -49,8 +49,14 @@ COPY --from=builder /build/target/release/obscura-worker /obscura-worker
 
 EXPOSE 9222
 
-# Bind to 0.0.0.0 so the port is reachable via `docker run -p 9222:9222`.
-# Native binary still defaults to 127.0.0.1 (loopback only) — this override
-# is just for the container.
+# Bind to 0.0.0.0 so the port is reachable via `docker run -p 9222:9222` and so
+# PaaS hosts (Railway, Render, Fly, Heroku) can route to it. The native binary
+# still defaults to 127.0.0.1 (loopback only); this override is just for the
+# container.
+#
+# The listen port is not pinned here: `obscura serve` reads the PORT env var
+# (falling back to 9222) so hosts that inject a dynamic port work out of the box.
+# The image is distroless with no shell, so $PORT cannot be expanded in an
+# exec-form CMD, so the binary reads it directly.
 ENTRYPOINT ["/obscura"]
-CMD ["serve", "--port", "9222", "--host", "0.0.0.0"]
+CMD ["serve", "--host", "0.0.0.0"]
